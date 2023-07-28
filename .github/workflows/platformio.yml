@@ -10,8 +10,8 @@ on:
   release:
     types:
       - created
-  schedule:
-    - cron: '0 5 15 * *'
+  # schedule:
+  #   - cron: '0 5 15 * *'
 
 jobs:
   build:
@@ -53,7 +53,7 @@ jobs:
     - name: Download Firmware
       uses: actions/download-artifact@v2
       with:
-        name: firmware.bin
+        name: firmware.zip
 
     - name: Create Release
       id: create_release
@@ -73,6 +73,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./*.bin
-        asset_name: firmware.bin
-        asset_content_type: application/octet-stream
+        asset_path: ./*.zip
+        asset_name: firmware.zip
+        asset_content_type: application/zip
