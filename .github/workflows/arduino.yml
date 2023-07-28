@@ -44,6 +44,6 @@ jobs:
           arduino-cli lib install --git-url https://github.com/domino4com/IGA.git
           arduino-cli lib install --git-url https://github.com/domino4com/IWA.git
 
-      - name: Compile Example
+      - name: Compile Application
         run: arduino-cli compile --fqbn esp32:esp32:esp32 ./AppStandard --warnings more
 
