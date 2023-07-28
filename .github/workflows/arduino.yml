@@ -37,11 +37,10 @@ jobs:
 
       - name: Install libraries
         run: |
-          arduino-cli lib install |
-          "ArduinoJson" |
-          https://github.com/domino4com/ILB |
-          https://github.com/domino4com/IGA |
-          https://github.com/domino4com/IWA
+          arduino-cli lib install ArduinoJson
+          arduino-cli lib install --git-url https://github.com/domino4com/ILB.git
+          arduino-cli lib install --git-url https://github.com/domino4com/IGA.git
+          arduino-cli lib install --git-url https://github.com/domino4com/IWA.git
 
       - name: Compile Example
         run: arduino-cli compile --fqbn esp32:esp32:esp32 ./AppStandard --warnings more

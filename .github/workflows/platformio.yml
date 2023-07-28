@@ -32,7 +32,7 @@ jobs:
     
     - name: Build single upload firmware
       run: | 
-        python -m esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf
+        esptool --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf
 
     - name: Upload Firmware
       uses: actions/upload-artifact@v2
