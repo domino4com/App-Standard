@@ -2,14 +2,15 @@ name: PlatformIO
 
 on:
   push:
-    branches:
-      - master
-      - develop
-      - main
+    paths:
+      - examples/**
+      - src/**
   pull_request:
   release:
     types:
       - created
+  schedule:
+    - cron: '0 5 15 * *'
 
 jobs:
   build:
@@ -51,7 +52,7 @@ jobs:
     - name: Download Firmware
       uses: actions/download-artifact@v2
       with:
-        name: firmware
+        name: firmware.bin
 
     - name: Create Release
       id: create_release
@@ -61,8 +62,8 @@ jobs:
       with:
         tag_name: V0.1.0
         release_name: Release V0.1.0
-        draft: false
-        prerelease: false
+        draft: true
+        prerelease: true
 
     - name: Upload Release Asset
       id: upload-release-asset 
