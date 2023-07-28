@@ -34,10 +34,6 @@ jobs:
     - name: Build single upload firmware
       run: | 
         esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf
-        echo "List .pio/build/CWV_PPU:"
-        ls -lah .pio/build/CWV_PPU
-        echo "List <root>:"
-        ls -lah 
 
     - name: Create Release
       id: create_release
@@ -57,6 +53,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: .pio/build/CWV_PPU/
+        asset_path: .pio/build/CWV_PPU
         asset_name: firmware.bin
         asset_content_type: application/octet-stream
