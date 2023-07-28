@@ -3,6 +3,7 @@ name: Arduino
 on:
   push:
     paths:
+      - .github/workflows/**
       - examples/**
       - src/**
   pull_request:

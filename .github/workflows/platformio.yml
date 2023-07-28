@@ -32,4 +32,10 @@ jobs:
       run: pio lib install
     - name: Build application
       run: platformio run
-      
+    - name: Create tag
+      uses: rickstaa/action-create-tag@v1
+      id: "tag_create"
+      with:
+        tag: "${{ github.event.head_commit.message }}"
+        tag_exists_error: false
+        message: "Latest release"
