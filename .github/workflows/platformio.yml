@@ -1,0 +1,75 @@
+name: PlatformIO
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - main
+  pull_request:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: Set up Python
+      uses: actions/setup-python@v1
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install platformio
+    - name: Install platformIO libraries
+      run: pio lib install
+    - name: Build application
+      run: platformio run
+    
+    - name: Build single upload firmware
+      run: | 
+        pythion -m esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf
+
+    - name: Upload Firmware
+      uses: actions/upload-artifact@v2
+      with:
+        name: firmware
+        path: .pio/build/CWV_PPU/*.bin
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Download Firmware
+      uses: actions/download-artifact@v2
+      with:
+        name: firmware
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./*.bin
+        asset_name: firmware.bin
+        asset_content_type: application/octet-stream
