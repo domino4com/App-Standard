@@ -34,8 +34,8 @@ jobs:
       run: platformio run
     - name: Build single upload firmware
       run: | 
-        esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf -o fw.bin
-        zip --junk-paths fw.zip fw.bin
+        esptool.py --chip ESP32 merge_bin -o fw.bin @flash_args 0x10000 .pio/build/esp32dev/firmware.bin
+        # zip --junk-paths fw.zip fw.bin
 
     - name: Create Release
       id : create_release
@@ -44,7 +44,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         tag_name: "${{ github.event.head_commit.message }}"
-        release_name: Release "${{ github.event.head_commit.message }}"
+        release_name: Release ${{ github.event.head_commit.message }}
         draft: true
         prerelease: true
 
@@ -55,8 +55,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./fw.zip
-        asset_name: fw.zip
+        asset_path: ./fw.bin
+        asset_name: fw.bin
         asset_content_type: application/zip
 
     # - name: Create tag
