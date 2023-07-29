@@ -16,8 +16,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      fw: ${{ steps.onefile.outputs.fw }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -36,12 +34,9 @@ jobs:
       run: platformio run
     - name: Build single upload firmware
       run: | 
-        esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf -o fw.zip
-        zip --junk-paths $GITHUB_OUTPUT fw.zip
+        esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf -o fw.bin
+        zip --junk-paths fw.zip fw.bin
 
-  release:
-    runs-on: ubuntu-latest
-    steps:
     - name: Create Release
       id : create_release
       uses: actions/create-release@v1
@@ -58,11 +53,10 @@ jobs:
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        FW: ${{needs.build.outputs.fw}}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./$FW
-        asset_name: $FW
+        asset_path: ./fw.zip
+        asset_name: fw.zip
         asset_content_type: application/zip
 
     # - name: Create tag
