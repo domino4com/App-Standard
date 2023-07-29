@@ -16,7 +16,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      fw: ${{ steps.onefile.outputs.fw }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -24,6 +25,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
     - name: Install dependencies
+      id: onefile
       run: |
         python -m pip install --upgrade pip
         pip install platformio
@@ -32,10 +34,41 @@ jobs:
       run: pio lib install
     - name: Build application
       run: platformio run
-    - name: Create tag
-      uses: rickstaa/action-create-tag@v1
-      id: "tag_create"
+    - name: Build single upload firmware
+      run: | 
+        esptool.py --chip ESP32 elf2image .pio/build/CWV_PPU/firmware.elf -o fw.zip
+        zip --junk-paths $GITHUB_OUTPUT fw.zip
+
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Release
+      id : create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag: "${{ github.event.head_commit.message }}"
-        tag_exists_error: false
-        message: "Latest release"
+        tag_name: "${{ github.event.head_commit.message }}"
+        release_name: Release "${{ github.event.head_commit.message }}"
+        draft: true
+        prerelease: true
+
+    - name: Upload Release Asset
+      id : upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        FW: ${{needs.build.outputs.fw}}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./$FW
+        asset_name: $FW
+        asset_content_type: application/zip
+
+    # - name: Create tag
+    #   uses: rickstaa/action-create-tag@v1
+    #    : "tag_create"
+    #   with:
+    #     tag: "${{ github.event.head_commit.message }}"
+    #     tag_exists_error: false
+    #     message: "Latest release"
